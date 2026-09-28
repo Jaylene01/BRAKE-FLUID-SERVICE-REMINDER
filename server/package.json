@@ -1,0 +1,15 @@
+{
+  "name": "weide-brake-fluid-reminder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WEIDE 刹车油保养提醒 - Express + Postgres backend with cross-device sync",
+  "type": "commonjs",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.12.0"
+  }
+}
