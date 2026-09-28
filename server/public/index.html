@@ -116,9 +116,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Manrope","Noto 
 .cardtitle{font-family:"Chakra Petch",sans-serif;font-size:3.1cqw;font-weight:700;letter-spacing:.17em;margin-top:4.3cqw;color:#E9C077}
 .cardtitle b{font-weight:700;color:#E9C077}
 
-.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:2.6cqw 2.7cqw;margin-top:auto;padding-top:3.4cqw}
-.grid .f{grid-column:span 2}
-.grid .f.wide{grid-column:span 3}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.6cqw 2.7cqw;margin-top:auto;padding-top:3.4cqw}
 .f .lab{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:1.82cqw;letter-spacing:.15em;text-transform:uppercase;
   color:rgba(233,192,119,.80);margin-bottom:1.2cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .f .val{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:3.15cqw;letter-spacing:.03em;font-variant-numeric:tabular-nums;
@@ -295,9 +293,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
               <div class="grid">
                 <div class="f"><div class="lab">Customer</div><div class="val" id="oCustomer">MS PANG</div></div>
                 <div class="f"><div class="lab">Vehicle No.</div><div class="val" id="oPlate">ABC 1234</div></div>
+                <div class="f"><div class="lab">Model</div><div class="val" id="oModel">—</div></div>
                 <div class="f"><div class="lab">Last Service Date</div><div class="val" id="oService">28/09/2026</div></div>
-                <div class="f wide"><div class="lab">Last Service KM</div><div class="val" id="oMileage">12,500 KM</div></div>
-                <div class="f wide accent"><div class="lab">Next Service KM</div><div class="val" id="oNextKm">52,500 KM</div></div>
+                <div class="f"><div class="lab">Last Service KM</div><div class="val" id="oMileage">12,500 KM</div></div>
+                <div class="f accent"><div class="lab">Next Service KM</div><div class="val" id="oNextKm">52,500 KM</div></div>
               </div>
             </div>
             <div class="face back">
@@ -338,7 +337,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 
       <div class="sect">
         <h2 class="stitle">客户与车辆</h2>
-        <p class="sdesc">前三项会印在卡面上，车型只留在记录里。</p>
+        <p class="sdesc">这四项都会印在卡面上。</p>
         <div class="fields">
           <label class="fld">客户名称<input id="iCustomer" type="text" placeholder="MS PANG" autocomplete="off"></label>
           <label class="fld">车牌号码<input id="iPlate" type="text" placeholder="ABC 1234" autocomplete="off"></label>
@@ -508,6 +507,7 @@ function render(){
   var r=readForm(),d=derive(r);
   $("oCustomer").textContent=(r.customer||"—").toUpperCase();
   $("oPlate").textContent=(r.plate||"—").toUpperCase();
+  $("oModel").textContent=(r.model||"—").toUpperCase();
   $("oMileage").textContent=km(r.mileage);
   $("oService").textContent=fmt(d.svc);
   $("oNextKm").textContent=km(d.nextKm);
@@ -722,18 +722,19 @@ function drawFront(ctx,r,d){
   var labH=1.82*U*1.25,vh=6.7*U,rowH=labH+1.2*U+vh,rowGap=2.6*U;
   var gy=H-PT-(rowH*2+rowGap);
   var items=[["CUSTOMER",(r.customer||"—").toUpperCase(),0],["VEHICLE NO.",(r.plate||"—").toUpperCase(),0],
-    ["LAST SERVICE DATE",fmt(d.svc),0],["LAST SERVICE KM",km(r.mileage),0],
+    ["MODEL",(r.model||"—").toUpperCase(),0],["LAST SERVICE DATE",fmt(d.svc),0],["LAST SERVICE KM",km(r.mileage),0],
     ["NEXT SERVICE KM",km(d.nextKm),1]];
   items.forEach(function(it,i){
-    var row=i<3?0:1,n=row?2:3,cw=(W-2*P-(n-1)*gap)/n;
-    var cx=P+(row?i-3:i)*(cw+gap),cy=gy+row*(rowH+rowGap);
+    var cw=(W-2*P-2*gap)/3,cx=P+(i%3)*(cw+gap),cy=gy+Math.floor(i/3)*(rowH+rowGap);
     font(ctx,1.82*U,600);ctx.fillStyle="rgba(233,192,119,.80)";
     tt(ctx,it[0],cx,cy+labH*0.8,1.82*U*0.15);
     var vy=cy+labH+1.2*U;
     pillBox(ctx,cx,vy,cw,vh,it[2]?"rgba(255,77,79,.05)":"rgba(255,255,255,.05)",it[2]?"rgba(255,77,79,.38)":"rgba(255,255,255,.17)");
-    font(ctx,3.15*U,600);ctx.fillStyle=it[2]?"#FF4D4F":"#F0F1F2";
+    var vs=3.15*U;font(ctx,vs,600);ctx.fillStyle=it[2]?"#FF4D4F":"#F0F1F2";
+    var vw=tw(ctx,it[1],vs*0.03),maxW=cw-5*U;
+    if(vw>maxW){vs*=maxW/vw;font(ctx,vs,600);}
     ctx.save();rr(ctx,cx,vy,cw,vh,vh/2);ctx.clip();
-    tt(ctx,it[1],cx+2.5*U,vy+vh/2+1.08*U,3.15*U*0.03);
+    tt(ctx,it[1],cx+2.5*U,vy+vh/2+vs*0.343,vs*0.03);
     ctx.restore();});
 }
 function drawBack(ctx,r,d){
@@ -924,7 +925,14 @@ if(fine){
 ["iCustomer","iPlate","iModel","iMileage","iService","iFluid","iIntervalKm","iLang","iWa","iInvoice","iNote"].forEach(function(id){
   $(id).addEventListener("input",render);$(id).addEventListener("change",render);});
 
+function fitVals(){ /* 车型等太长的值自动缩小字体 */
+  var vs=document.querySelectorAll(".face.front .val");
+  for(var i=0;i<vs.length;i++){var v=vs[i];v.style.fontSize="";
+    for(var k=0;k<14&&v.scrollWidth>v.clientWidth+0.5;k++)
+      v.style.fontSize=(parseFloat(getComputedStyle(v).fontSize)*0.94).toFixed(2)+"px";}
+}
 function fitTerms(){
+  fitVals();
   var t=document.querySelector(".terms");if(!t)return;
   var ul=t.querySelector("ul"),w=wrapEl.clientWidth;if(!w||!ul)return;
   var fs=w*0.0186;
