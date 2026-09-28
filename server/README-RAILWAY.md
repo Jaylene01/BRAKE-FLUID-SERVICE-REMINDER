@@ -5,9 +5,9 @@
 
 ## 跟保修卡的不同
 
-- 卡面：BRAKE FLUID SERVICE REMINDER，显示本次保养日期、下次保养日期、下次保养里程
-- 背面：刹车油型号、更换周期（月 / KM）、保养须知、WhatsApp
-- 状态：正常 / 即将到期（30 天内）/ 需更换（已过期）
+- 卡面：BRAKE FLUID SERVICE REMINDER，显示客户、车牌、保养日期、当前里程、下次保养里程
+- 背面：刹车油型号、更换周期（KM）、保养须知、WhatsApp
+- 只按公里数提醒，不按日期到期；Invoice No. 只在后台记录里看得到
 - 数据表：`brake_fluid_services`（跟保修卡的 `warranty_cards` 分开，不会互相影响）
 
 ## 部署到 Railway
