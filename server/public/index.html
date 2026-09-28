@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WEIDE 刹车油保养提醒</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -232,6 +234,15 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .mbox img{max-width:100%;border-radius:12px;box-shadow:0 24px 60px -24px rgba(0,0,0,.8)}
 .mbox p{color:#D9DBDF;font-size:13.5px;margin:16px 0 14px;font-weight:400}
 
+/* 电脑版：左卡片、右表单 */
+@media (min-width:1200px){
+  .wrap{max-width:1380px}
+  #viewIssue{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(400px,1fr);gap:20px;align-items:start}
+  #viewIssue .panel{margin-top:0}
+}
+@media (min-width:1200px) and (min-height:720px){
+  #viewIssue .stage{position:sticky;top:20px}
+}
 @media (max-width:560px){
   body{font-size:14.5px}
   .top{gap:12px}
@@ -285,8 +296,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
               <div class="grid">
                 <div class="f"><div class="lab">Customer</div><div class="val" id="oCustomer">MS PANG</div></div>
                 <div class="f"><div class="lab">Vehicle No.</div><div class="val" id="oPlate">ABC 1234</div></div>
-                <div class="f"><div class="lab">Service Date</div><div class="val" id="oService">28/09/2026</div></div>
-                <div class="f wide"><div class="lab">Mileage</div><div class="val" id="oMileage">12,500 KM</div></div>
+                <div class="f"><div class="lab">Last Service Date</div><div class="val" id="oService">28/09/2026</div></div>
+                <div class="f wide"><div class="lab">Last Service KM</div><div class="val" id="oMileage">12,500 KM</div></div>
                 <div class="f wide accent"><div class="lab">Next Service KM</div><div class="val" id="oNextKm">52,500 KM</div></div>
               </div>
             </div>
@@ -332,7 +343,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
         <div class="fields">
           <label class="fld">客户名称<input id="iCustomer" type="text" placeholder="MS PANG" autocomplete="off"></label>
           <label class="fld">车牌号码<input id="iPlate" type="text" placeholder="ABC 1234" autocomplete="off"></label>
-          <label class="fld">当前里程 (KM)<input id="iMileage" type="number" min="0" step="100" placeholder="12500"></label>
+          <label class="fld">保养时里程 (KM)<input id="iMileage" type="number" min="0" step="100" placeholder="12500"></label>
           <label class="fld">车型<input id="iModel" type="text" placeholder="Porsche Cayenne Coupe" autocomplete="off"></label>
         </div>
       </div>
@@ -692,7 +703,7 @@ function drawFront(ctx,r,d){
   var labH=1.82*U*1.25,vh=6.7*U,rowH=labH+1.2*U+vh,rowGap=2.6*U;
   var gy=H-PT-(rowH*2+rowGap);
   var items=[["CUSTOMER",(r.customer||"—").toUpperCase(),0],["VEHICLE NO.",(r.plate||"—").toUpperCase(),0],
-    ["SERVICE DATE",fmt(d.svc),0],["MILEAGE",km(r.mileage),0],
+    ["LAST SERVICE DATE",fmt(d.svc),0],["LAST SERVICE KM",km(r.mileage),0],
     ["NEXT SERVICE KM",km(d.nextKm),1]];
   items.forEach(function(it,i){
     var row=i<3?0:1,n=row?2:3,cw=(W-2*P-(n-1)*gap)/n;
