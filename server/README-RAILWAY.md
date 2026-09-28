@@ -6,7 +6,8 @@
 ## 跟保修卡的不同
 
 - 卡面：BRAKE FLUID SERVICE REMINDER，显示客户、车牌、LAST SERVICE DATE、LAST SERVICE KM、NEXT SERVICE KM；电脑版左卡片右表单
-- 背面：刹车油型号、更换周期（KM）、保养须知、WhatsApp
+- 背面：刹车油型号、更换周期（KM）、保养须知（可选中文 / English）、WhatsApp
+- 卡片纯黑色，NEXT SERVICE KM 数字为红色
 - 只按公里数提醒，不按日期到期；Invoice No. 只在后台记录里看得到
 - 数据表：`brake_fluid_services`（跟保修卡的 `warranty_cards` 分开，不会互相影响）
 

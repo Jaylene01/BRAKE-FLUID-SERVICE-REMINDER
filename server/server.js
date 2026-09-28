@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS brake_fluid_services (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE brake_fluid_services ADD COLUMN IF NOT EXISTS lang TEXT NOT NULL DEFAULT 'zh';
 CREATE INDEX IF NOT EXISTS brake_fluid_services_plate_idx ON brake_fluid_services (lower(plate));
 CREATE INDEX IF NOT EXISTS brake_fluid_services_customer_idx ON brake_fluid_services (lower(customer));
 `;
@@ -90,6 +91,7 @@ function rowToRecord(r) {
     months: r.months,
     intervalKm: r.interval_km,
     fluid: r.fluid,
+    lang: r.lang,
     wa: r.wa,
     invoice: r.invoice,
     note: r.note,
@@ -151,6 +153,7 @@ app.post('/api/records', async (req, res) => {
     months: cleanInt(b.months, 24),
     intervalKm: cleanInt(b.intervalKm, 40000),
     fluid: cleanStr(b.fluid, 20) || 'DOT 4',
+    lang: b.lang === 'en' ? 'en' : 'zh',
     wa: cleanStr(b.wa, 40),
     invoice: cleanStr(b.invoice, 60),
     note: cleanStr(b.note, 2000),
@@ -158,11 +161,11 @@ app.post('/api/records', async (req, res) => {
   try {
     const { rows } = await pool.query(
       `INSERT INTO brake_fluid_services
-        (id, customer, plate, model, mileage, service_date, months, interval_km, fluid, wa, invoice, note)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        (id, customer, plate, model, mileage, service_date, months, interval_km, fluid, wa, invoice, note, lang)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
        RETURNING *`,
       [rec.id, rec.customer, rec.plate, rec.model, rec.mileage, rec.serviceDate,
-       rec.months, rec.intervalKm, rec.fluid, rec.wa, rec.invoice, rec.note]
+       rec.months, rec.intervalKm, rec.fluid, rec.wa, rec.invoice, rec.note, rec.lang]
     );
     res.status(201).json({ record: rowToRecord(rows[0]) });
   } catch (e) {
@@ -183,6 +186,7 @@ app.put('/api/records/:id', async (req, res) => {
     months: cleanInt(b.months, 24),
     intervalKm: cleanInt(b.intervalKm, 40000),
     fluid: cleanStr(b.fluid, 20) || 'DOT 4',
+    lang: b.lang === 'en' ? 'en' : 'zh',
     wa: cleanStr(b.wa, 40),
     invoice: cleanStr(b.invoice, 60),
     note: cleanStr(b.note, 2000),
@@ -191,11 +195,11 @@ app.put('/api/records/:id', async (req, res) => {
     const { rows } = await pool.query(
       `UPDATE brake_fluid_services SET
          customer=$1, plate=$2, model=$3, mileage=$4, service_date=$5,
-         months=$6, interval_km=$7, fluid=$8, wa=$9, invoice=$10, note=$11, updated_at=now()
-       WHERE id=$12
+         months=$6, interval_km=$7, fluid=$8, wa=$9, invoice=$10, note=$11, lang=$12, updated_at=now()
+       WHERE id=$13
        RETURNING *`,
       [rec.customer, rec.plate, rec.model, rec.mileage, rec.serviceDate,
-       rec.months, rec.intervalKm, rec.fluid, rec.wa, rec.invoice, rec.note, id]
+       rec.months, rec.intervalKm, rec.fluid, rec.wa, rec.invoice, rec.note, rec.lang, id]
     );
     if (!rows.length) return res.status(404).json({ error: 'not_found' });
     res.json({ record: rowToRecord(rows[0]) });
