@@ -124,7 +124,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Manrope","Noto 
 .f .val{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:3.15cqw;letter-spacing:.03em;font-variant-numeric:tabular-nums;
   color:#F0F1F2;border:1px solid rgba(255,255,255,.17);border-radius:99px;background:rgba(255,255,255,.05);
   padding:1.55cqw 2.5cqw;line-height:1.16;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:inset 0 1px 0 rgba(255,255,255,.13)}
-.f.accent .val{color:#FF4D4F}
+.f.accent .val{color:#FF4D4F;border-color:rgba(255,77,79,.38);background:rgba(255,77,79,.05)}
 
 .bhead .rt{text-align:right}
 .bhead .rt .en{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:2.6cqw;letter-spacing:.22em;color:#E9C077}
@@ -730,7 +730,7 @@ function drawFront(ctx,r,d){
     font(ctx,1.82*U,600);ctx.fillStyle="rgba(233,192,119,.80)";
     tt(ctx,it[0],cx,cy+labH*0.8,1.82*U*0.15);
     var vy=cy+labH+1.2*U;
-    pillBox(ctx,cx,vy,cw,vh,"rgba(255,255,255,.05)","rgba(255,255,255,.17)");
+    pillBox(ctx,cx,vy,cw,vh,it[2]?"rgba(255,77,79,.05)":"rgba(255,255,255,.05)",it[2]?"rgba(255,77,79,.38)":"rgba(255,255,255,.17)");
     font(ctx,3.15*U,600);ctx.fillStyle=it[2]?"#FF4D4F":"#F0F1F2";
     ctx.save();rr(ctx,cx,vy,cw,vh,vh/2);ctx.clip();
     tt(ctx,it[1],cx+2.5*U,vy+vh/2+1.08*U,3.15*U*0.03);
