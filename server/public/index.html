@@ -131,7 +131,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Manrope","Noto 
 .chip{border:1px solid rgba(255,255,255,.16);border-radius:2.4cqw;background:rgba(255,255,255,.045);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.11);padding:2cqw 1.6cqw;text-align:center}
 .chip .k{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:1.45cqw;letter-spacing:.11em;color:rgba(233,192,119,.80);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chip .v{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:2.6cqw;margin-top:1cqw;font-variant-numeric:tabular-nums;white-space:nowrap;color:#F0F1F2}
+.chip .v{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:2.6cqw;margin-top:1cqw;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;color:#F0F1F2}
 .lower{display:flex;gap:3.6cqw;margin-top:3.6cqw;flex:1;min-height:0}
 .terms{flex:1;min-width:0;overflow:hidden;font-size:1.86cqw}
 .terms ul{margin:0;padding:0;min-height:100%;display:flex;flex-direction:column;justify-content:center}
@@ -351,13 +351,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
         <p class="sdesc">下次保养里程会自动算出来。</p>
         <div class="fields">
           <label class="fld">本次保养日期<input id="iService" type="date"></label>
-          <label class="fld">刹车油型号
-            <select id="iFluid">
-              <option value="DOT 3">DOT 3</option><option value="DOT 4" selected>DOT 4</option>
-              <option value="DOT 4 LV">DOT 4 LV</option><option value="DOT 5.1">DOT 5.1</option>
-              <option value="RACING">RACING</option>
-            </select>
-          </label>
+          <label class="fld">刹车油型号<input id="iFluid" type="text" list="fluidList" maxlength="40" placeholder="可自己填写，例如 DOT 4" autocomplete="off"></label>
+          <datalist id="fluidList">
+            <option value="DOT 3"></option><option value="DOT 4"></option><option value="DOT 4 LV"></option>
+            <option value="DOT 5.1"></option><option value="RACING"></option>
+          </datalist>
           <label class="fld">更换周期（KM）
             <select id="iIntervalKm">
               <option value="10000">10,000 KM</option><option value="20000">20,000 KM</option>
@@ -482,7 +480,7 @@ function readForm(){
   var m=parseInt($("iMileage").value,10); if(isNaN(m)||m<0)m=0;
   return {customer:$("iCustomer").value.trim(),plate:$("iPlate").value.trim(),model:$("iModel").value.trim(),
     mileage:m,serviceDate:$("iService").value||todayISO(),
-    intervalKm:parseInt($("iIntervalKm").value,10)||DEF.intervalKm,fluid:$("iFluid").value||DEF.fluid,lang:$("iLang").value==="en"?"en":"zh",
+    intervalKm:parseInt($("iIntervalKm").value,10)||DEF.intervalKm,fluid:$("iFluid").value.trim(),lang:$("iLang").value==="en"?"en":"zh",
     wa:$("iWa").value.trim(),invoice:$("iInvoice").value.trim(),note:$("iNote").value.trim()};
 }
 function setSelect(el,v,def){
@@ -496,7 +494,7 @@ function writeForm(r){
   $("iModel").value=r.model||""; $("iMileage").value=(r.mileage===0||r.mileage)?r.mileage:"";
   $("iService").value=r.serviceDate||todayISO();
   setSelect($("iIntervalKm"),r.intervalKm,DEF.intervalKm);
-  setSelect($("iFluid"),r.fluid,DEF.fluid); $("iLang").value=r.lang==="en"?"en":"zh";
+  $("iFluid").value=r.fluid==null?DEF.fluid:r.fluid; $("iLang").value=r.lang==="en"?"en":"zh";
   $("iWa").value=r.wa||DEF.wa; $("iInvoice").value=r.invoice||""; $("iNote").value=r.note||"";
 }
 function derive(r){
@@ -511,11 +509,11 @@ function render(){
   $("oMileage").textContent=km(r.mileage);
   $("oService").textContent=fmt(d.svc);
   $("oNextKm").textContent=km(d.nextKm);
-  $("oFluid").textContent=r.fluid;
+  $("oFluid").textContent=r.fluid||"—";
   $("oEveryKm").textContent=km(r.intervalKm);
   $("oWa").textContent=r.wa||"—";
   if(renderTerms.lang!==r.lang){renderTerms.lang=r.lang;renderTerms(r.lang);}
-  $("dNextKm").textContent=km(d.nextKm); $("dEvery").textContent=km(r.intervalKm); $("dFluid").textContent=r.fluid;
+  $("dNextKm").textContent=km(d.nextKm); $("dEvery").textContent=km(r.intervalKm); $("dFluid").textContent=r.fluid||"—";
   var l=waLink(r.wa); $("waBtn").href=l; $("waCard").href=l;
   fitTerms();
 }
@@ -614,7 +612,8 @@ function renderHist(){
     var sc=document.createElement("span");sc.className="cust";sc.textContent=r.customer||"";
     l1.appendChild(sp);l1.appendChild(sc);
     var l2=document.createElement("div");l2.className="l2";
-    var bits=[fmt(d.svc),km(r.mileage)+" → "+km(d.nextKm),r.fluid];
+    var bits=[fmt(d.svc),km(r.mileage)+" → "+km(d.nextKm)];
+    if(r.fluid)bits.push(r.fluid);
     if(r.model)bits.push(r.model);
     if(r.invoice)bits.push("Invoice No. "+r.invoice);
     bits.forEach(function(b,i){
@@ -747,7 +746,7 @@ function drawBack(ctx,r,d){
   font(ctx,1.85*U,500,r.lang!=="en");ctx.fillStyle="rgba(233,192,119,.70)";
   tt(ctx,TERMS_SUB[r.lang],W-P,PT+2.6*U+0.9*U+1.85*U,1.85*U*0.18,"right");
   var g=2.1*U,cw=(W-2*P-g)/2,ch=9.4*U,cy=PT+lh+3.8*U;
-  var chips=[["FLUID TYPE",r.fluid],["CHANGE EVERY",km(r.intervalKm)]];
+  var chips=[["FLUID TYPE",r.fluid||"—"],["CHANGE EVERY",km(r.intervalKm)]];
   chips.forEach(function(c,i){
     var x=P+i*(cw+g);
     rr(ctx,x,cy,cw,ch,2.4*U);ctx.fillStyle="rgba(255,255,255,.045)";ctx.fill();
@@ -926,7 +925,7 @@ if(fine){
   $(id).addEventListener("input",render);$(id).addEventListener("change",render);});
 
 function fitVals(){ /* 车型等太长的值自动缩小字体 */
-  var vs=document.querySelectorAll(".face.front .val");
+  var vs=document.querySelectorAll(".face.front .val,.chip .v");
   for(var i=0;i<vs.length;i++){var v=vs[i];v.style.fontSize="";
     for(var k=0;k<14&&v.scrollWidth>v.clientWidth+0.5;k++)
       v.style.fontSize=(parseFloat(getComputedStyle(v).fontSize)*0.94).toFixed(2)+"px";}
