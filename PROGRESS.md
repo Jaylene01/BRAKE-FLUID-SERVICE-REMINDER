@@ -15,7 +15,10 @@ Updated: 2026-10-10 (Asia/Kuala_Lumpur)
 
 ## Deployment
 - Previous deployment `e72b756c-8c4e-4be5-9f23-381b6849c8db` succeeded for `0fb803e050d9c5923963f7d1499628a8973236ae`, but contained different icon bytes.
-- Original ZIP restoration: awaiting GitHub push and Railway production verification.
+- Original ZIP restoration commit: `9b9366648c28a1165e4bdb68990ac384fd13f56f`, pushed to main.
+- Railway production deployment `77e58d89-ab99-4e55-8c45-f0c538da9a42`: SUCCESS, verified on 2026-10-10 (Asia/Kuala_Lumpur).
+- Production: all three PNG SHA-256 values match the original ZIP; service worker serves v4; manifest returns HTTP 200.
+- Browser verification: application loads, cloud connection is active, and the records tab shows 5 existing records. No records were edited.
 - Test URL: https://brake-fluid-reminder-production.up.railway.app
 
 ## Samsung installation
