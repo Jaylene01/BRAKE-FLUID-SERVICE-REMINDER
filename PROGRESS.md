@@ -5,7 +5,11 @@ Updated: 2026-10-10 (Asia/Kuala_Lumpur)
 ## Completed
 - Current update: user approved a transparent premium 3D icon in the same series as WEIDE Warranty Card. Removed all bottom BRAKE FLUID / SERVICE RECORD text, retained gold fluid droplet and clear WEIDE caliper lettering.
 - Replaced 192px, 512px and 192px touch icons; retained 5% transparent padding. Changed transparent 512px icon purpose to any (not a maskable asset).
-- Service-worker cache now v5; latest icon deployment verification pending. Older entries below document the previous v4 deployment.
+- Service-worker cache now v5. Older entries below document the previous v4 deployment.
+- No-text icon commit 68032a18fdbf6b32026c43df9ad64bbc9618989a pushed to main.
+- Railway deployment df8c345e-092e-40c3-aa2f-fa3622454812: SUCCESS.
+- All three deployed PNG hashes match local assets; homepage and manifest return HTTP 200; production serves cache v5.
+- Customer records were not read or modified during this update.
 - Repository: `Jaylene01/BRAKE-FLUID-SERVICE-REMINDER`, branch `main`.
 - Installed the exact original `Brake_Fluid_Reminder_Icon_Update.zip` assets (2号 Performance Style).
 - Paths: `server/public/icons/icon-192.png` (192×192), `icon-512.png` (512×512), and `apple-touch-icon.png` (192×192).
