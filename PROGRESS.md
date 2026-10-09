@@ -6,7 +6,8 @@ Updated: 2026-10-10 (Asia/Kuala_Lumpur)
 - Launcher follow-up: user reports old lettering remains after reinstalling from a previously saved link. Website artwork appears updated; physical-device cause is not yet confirmed.
 - Added distinct no-text v2 PNG filenames and changed manifest, favicon and touch references to them, preserving the manifest URL and start URL for existing app identity. Cache advanced to v6.
 - Previous user-requested redeployment 8273f303-ce03-4115-81d9-976ff32f7743 succeeded; public 512px hash matched, homepage HTTP 200.
-- v2 filename rollout: awaiting deployment verification. Phone launcher refresh remains pending device confirmation.
+- v2 filename rollout commit ac8f00ccb541b1a78f737a87e45cd72dd8238096 deployed successfully as e1471664-3b6d-43b3-b120-af2af0728013.
+- Verified new 512px file hash, manifest v2 icon URLs and HTML v2 touch reference on production. Phone launcher refresh remains pending device confirmation.
 - Current update: user approved a transparent premium 3D icon in the same series as WEIDE Warranty Card. Removed all bottom BRAKE FLUID / SERVICE RECORD text, retained gold fluid droplet and clear WEIDE caliper lettering.
 - Replaced 192px, 512px and 192px touch icons; retained 5% transparent padding. Changed transparent 512px icon purpose to any (not a maskable asset).
 - Service-worker cache now v5. Older entries below document the previous v4 deployment.
