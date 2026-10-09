@@ -1,5 +1,5 @@
-const CACHE_NAME = 'weide-brake-fluid-v5';
-const APP_SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
+const CACHE_NAME = 'weide-brake-fluid-v6';
+const APP_SHELL = ['/', '/manifest.webmanifest', '/icons/brake-fluid-no-text-192-v2.png', '/icons/brake-fluid-no-text-512-v2.png', '/icons/brake-fluid-no-text-touch-v2.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
