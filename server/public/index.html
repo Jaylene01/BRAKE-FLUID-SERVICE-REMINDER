@@ -1,6 +1,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0C0D0F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Brake Fluid">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>WEIDE 刹车油保养提醒</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap">
@@ -950,5 +957,13 @@ writeForm({customer:"MS PANG",plate:"ABC 1234",mileage:12500,serviceDate:todayIS
 setEditing(null);render();
 loadRecords();
 setInterval(function(){ if(!$("viewHist").classList.contains("hidden")) loadRecords(); },20000);
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("/sw.js").catch(function(e){
+      console.warn("[pwa] service worker registration failed",e);
+    });
+  });
+}
 })();
 </script>
