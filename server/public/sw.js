@@ -1,4 +1,4 @@
-const CACHE_NAME = 'weide-brake-fluid-v3';
+const CACHE_NAME = 'weide-brake-fluid-v4';
 const APP_SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
 
 self.addEventListener('install', event => {

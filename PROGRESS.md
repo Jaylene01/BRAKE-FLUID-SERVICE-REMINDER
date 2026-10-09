@@ -1,17 +1,23 @@
 # Brake Fluid Reminder — Progress
 
-Updated: 2026-10-09
+Updated: 2026-10-10 (Asia/Kuala_Lumpur)
 
 ## Completed
-- Correct project confirmed: `Jaylene01/BRAKE-FLUID-SERVICE-REMINDER`.
-- PWA install support is enabled.
-- Replaced the temporary/old app icon with the approved Performance Style brake-fluid icon.
-- Added 192x192 and 512x512 PNG app icons.
-- Added a dedicated touch icon for Samsung/Android/Apple installation.
-- Updated the browser favicon to the new PNG icon.
-- Bumped the service-worker cache to v3 so existing devices can receive the new icon assets.
-- Existing customer records and brake-fluid service logic were not changed.
+- Repository: `Jaylene01/BRAKE-FLUID-SERVICE-REMINDER`, branch `main`.
+- Installed the exact original `Brake_Fluid_Reminder_Icon_Update.zip` assets (2号 Performance Style).
+- Paths: `server/public/icons/icon-192.png` (192×192), `icon-512.png` (512×512), and `apple-touch-icon.png` (192×192).
+- The supplied artwork contains the wording “BRAKE FLUID SERVICE RECORD”; retained exactly as supplied.
+- SHA-256 for 192px/touch: `02421AEC8ADFBA3219F052910C11311D8725B170769DBB7AC4453451C794BEFC`.
+- SHA-256 for 512px: `89EF9E688FDDBA9FD01EC2EFFA7C164D6E31DF241AAE39A966E0EDBA166FD8ED`.
+- Existing manifest and HTML already reference these paths; no webpage changes required.
+- Service-worker cache bumped from v3 to v4 to refresh cached icon assets.
+- Customer records, database, API and existing webpage functionality unchanged.
 
 ## Deployment
-- GitHub: icon update committed to main.
-- Railway: configured to auto-deploy from GitHub main; production status to be verified.
+- Previous deployment `e72b756c-8c4e-4be5-9f23-381b6849c8db` succeeded for `0fb803e050d9c5923963f7d1499628a8973236ae`, but contained different icon bytes.
+- Original ZIP restoration: awaiting GitHub push and Railway production verification.
+- Test URL: https://brake-fluid-reminder-production.up.railway.app
+
+## Samsung installation
+- Manifest specifies `display: standalone`.
+- Samsung physical-device installation, launcher icon, and standalone launch: pending verification.
