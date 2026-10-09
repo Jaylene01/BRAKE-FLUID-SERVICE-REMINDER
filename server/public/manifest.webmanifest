@@ -1,0 +1,11 @@
+{
+  "name": "WEIDE Brake Fluid Reminder",
+  "short_name": "Brake Fluid",
+  "description": "WEIDE Brake Fluid Service Reminder",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0C0D0F",
+  "theme_color": "#0C0D0F",
+  "lang": "zh-Hans"
+}
