@@ -1,6 +1,17 @@
 # Brake Fluid Reminder — Progress
 
-Updated: 2026-10-10 (Asia/Kuala_Lumpur)
+Updated: 2026-10-13 (Asia/Kuala_Lumpur)
+
+## JPEG download update — 2026-10-13
+- Implemented in the correct repository `Jaylene01/BRAKE-FLUID-SERVICE-REMINDER`, main branch; Railway project/service `brake-fluid-reminder`.
+- Downloads encode as image/jpeg at quality 0.95. Front filename is exactly `BrakeFluid_<current form plate>_front.jpg`; back uses the same plate with `_back.jpg`.
+- Plate is read dynamically from the current form, with a single snapshot shared by rendering and naming; RBB688 is not hardcoded.
+- Front/back drawing code, card dimensions and complete maintenance fields are unchanged. Actual JPEG visually inspected.
+- Code commit: `9471904f7535c5494a185641cd67fe3d0ba7b627`.
+- Railway production deployment: `2c7f711b-1081-4529-bb6a-ce015a48d414` — SUCCESS.
+- Actual browser downloads verified both locally and on production: `RBB688 → BrakeFluid_RBB688_front.jpg`; `JXY1234 → BrakeFluid_JXY1234_front.jpg`. Both files start with JPEG signature FF D8 FF (228291 and 228212 bytes).
+- Production verification used unsaved form inputs and intercepted API calls; no customer records were created, edited or deleted. Brake Service record and Warranty Card projects were not modified.
+- Production URL: https://brake-fluid-reminder-production.up.railway.app/
 
 ## Completed
 - Launcher follow-up: user reports old lettering remains after reinstalling from a previously saved link. Website artwork appears updated; physical-device cause is not yet confirmed.
