@@ -808,14 +808,14 @@ function drawBack(ctx,r,d){
   font(ctx,1.6*U,400,true);ctx.fillStyle="rgba(233,234,236,.44)";
   tt(ctx,FOOT[r.lang],W/2,fy,1.6*U*0.12,"center");
 }
-function makeCanvas(side){
+function makeCanvas(side,record){
   var c=document.createElement("canvas");c.width=CW;c.height=CH;
-  var ctx=c.getContext("2d"),r=readForm(),d=derive(r);
+  var ctx=c.getContext("2d"),r=record||readForm(),d=derive(r);
   if(side==="front")drawFront(ctx,r,d);else drawBack(ctx,r,d);
   return c;}
 function safeName(r,side){
-  var base=(r.plate||r.customer||"card").replace(/[^A-Za-z0-9]+/g,"").toUpperCase()||"CARD";
-  return "WEIDE-BrakeFluid-"+base+"-"+side+".png";}
+  var base=(r.plate||"").trim();
+  return "BrakeFluid_"+base+"_"+side+".jpg";}
 async function offer(filename,blob){
   var ok=false;
   try{
@@ -831,17 +831,19 @@ async function offer(filename,blob){
       setTimeout(function(){URL.revokeObjectURL(url);},4000);ok=true;
     }catch(e2){ok=false;}}
   return ok?"saved":"blocked";}
-async function downloadPNG(side){
+async function downloadJPEG(side){
   var btn=side==="front"?$("btnPngF"):$("btnPngB");
   btn.disabled=true;var old=btn.textContent;btn.textContent="生成中…";
   try{
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
-    var c=makeCanvas(side);
-    var blob=await new Promise(function(res){c.toBlob(res,"image/png");});
-    var res=await offer(safeName(readForm(),side),blob);
+    var record=readForm();
+    var c=makeCanvas(side,record);
+    var blob=await new Promise(function(res){c.toBlob(res,"image/jpeg",0.95);});
+    if(!blob||blob.type!=="image/jpeg")throw new Error("JPEG 编码失败");
+    var res=await offer(safeName(record,side),blob);
     if(res==="saved")toast("图片已下载");
     else if(res==="declined")toast("已取消");
-    else{$("modalImg").src=c.toDataURL("image/png");$("modal").classList.add("on");}
+    else{$("modalImg").src=c.toDataURL("image/jpeg",0.95);$("modal").classList.add("on");}
   }catch(e){toast("生成失败："+(e.message||e));}
   btn.disabled=false;btn.textContent=old;}
 
@@ -896,8 +898,8 @@ flip.addEventListener("click",toggleFlip);
 flip.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleFlip();}});
 $("btnFlip").addEventListener("click",toggleFlip);
 $("btnPrint").addEventListener("click",function(){window.print();});
-$("btnPngF").addEventListener("click",function(){downloadPNG("front");});
-$("btnPngB").addEventListener("click",function(){downloadPNG("back");});
+$("btnPngF").addEventListener("click",function(){downloadJPEG("front");});
+$("btnPngB").addEventListener("click",function(){downloadJPEG("back");});
 $("modalClose").addEventListener("click",function(){$("modal").classList.remove("on");});
 $("modal").addEventListener("click",function(e){if(e.target===$("modal"))$("modal").classList.remove("on");});
 $("btnSave").addEventListener("click",saveRecord);
