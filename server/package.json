@@ -7,7 +7,8 @@
   "engines": { "node": ">=18" },
   "scripts": {
     "start": "node server.js",
-    "test": "node test-pwa.mjs"
+    "test": "node test-pwa.mjs && node test-service-due.mjs",
+    "test:browser": "node test-service-due-browser.cjs"
   },
   "dependencies": {
     "express": "^4.19.2",

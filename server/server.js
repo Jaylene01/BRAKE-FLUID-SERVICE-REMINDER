@@ -109,6 +109,12 @@ function cleanStr(v, max) {
   const s = v.trim();
   return max ? s.slice(0, max) : s;
 }
+function readMonths(v) {
+  if (v == null) return null; // Legacy PUT clients must not reset a stored cycle.
+  const n = typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN);
+  return Number.isInteger(n) && n >= 0 && n <= 1200 ? n : NaN;
+}
+
 function cleanInt(v, def) {
   const n = parseInt(v, 10);
   return Number.isFinite(n) && n >= 0 ? n : def;
@@ -142,6 +148,8 @@ app.get('/api/records', async (req, res) => {
 
 app.post('/api/records', async (req, res) => {
   const b = req.body || {};
+  const months = readMonths(b.months);
+  if (Number.isNaN(months)) return res.status(400).json({ error: 'invalid_months' });
   const id = genId();
   const rec = {
     id,
@@ -150,7 +158,7 @@ app.post('/api/records', async (req, res) => {
     model: cleanStr(b.model, 120),
     mileage: cleanInt(b.mileage, 0),
     serviceDate: cleanStr(b.serviceDate, 10) || null,
-    months: cleanInt(b.months, 24),
+    months: months == null ? 0 : months,
     intervalKm: cleanInt(b.intervalKm, 40000),
     fluid: cleanStr(b.fluid, 40),
     lang: b.lang === 'en' ? 'en' : 'zh',
@@ -176,6 +184,8 @@ app.post('/api/records', async (req, res) => {
 
 app.put('/api/records/:id', async (req, res) => {
   const b = req.body || {};
+  const months = readMonths(b.months);
+  if (Number.isNaN(months)) return res.status(400).json({ error: 'invalid_months' });
   const id = cleanStr(req.params.id, 64);
   const rec = {
     customer: cleanStr(b.customer, 120),
@@ -183,7 +193,7 @@ app.put('/api/records/:id', async (req, res) => {
     model: cleanStr(b.model, 120),
     mileage: cleanInt(b.mileage, 0),
     serviceDate: cleanStr(b.serviceDate, 10) || null,
-    months: cleanInt(b.months, 24),
+    months,
     intervalKm: cleanInt(b.intervalKm, 40000),
     fluid: cleanStr(b.fluid, 40),
     lang: b.lang === 'en' ? 'en' : 'zh',
@@ -195,7 +205,7 @@ app.put('/api/records/:id', async (req, res) => {
     const { rows } = await pool.query(
       `UPDATE brake_fluid_services SET
          customer=$1, plate=$2, model=$3, mileage=$4, service_date=$5,
-         months=$6, interval_km=$7, fluid=$8, wa=$9, invoice=$10, note=$11, lang=$12, updated_at=now()
+         months=COALESCE($6, months), interval_km=$7, fluid=$8, wa=$9, invoice=$10, note=$11, lang=$12, updated_at=now()
        WHERE id=$13
        RETURNING *`,
       [rec.customer, rec.plate, rec.model, rec.mileage, rec.serviceDate,

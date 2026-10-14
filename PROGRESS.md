@@ -1,6 +1,19 @@
 # Brake Fluid Reminder — Progress
 
-Updated: 2026-10-13 (Asia/Kuala_Lumpur)
+Updated: 2026-10-15 (Asia/Kuala_Lumpur)
+
+## Next Service Due — PR only, 2026-10-15
+- Correct project: `Jaylene01/BRAKE-FLUID-SERVICE-REMINDER`; separate `brake-service-record` project untouched. Based on main `36de09a`.
+- Reference invoice labels Last Service and Next Service Due show KM. Retained Last Service Date/KM and Next Service KM; added a separate Next Service Due date to both HTML preview and JPEG front, using the existing black/gold card, dimensions and embedded Logo.
+- Existing backend already stores/returns `months`, previously silently defaulting missing requests to 24. Frontend now exposes, loads and saves this field. New records use no assumed cycle (blank/0 = unset); existing stored values remain available for review, including legacy defaults that were never explicitly selected.
+- Date = Last Service Date + configured integer months (0–1200), clamped to the last day of the target month. No date is derived for unset cycles. Dates also appear in history, summary and CSV. KM calculation remains unchanged.
+- API rejects invalid cycles. Legacy PUT requests omitting months preserve stored months with COALESCE; explicit 0 clears the cycle. No schema migration or bulk record changes.
+- `npm test` passes. Covers month end, leap year, year rollover, unset/invalid cycles, unchanged next KM, simulated API create/update, omitted-cycle compatibility. Date tests also pass in Asia/Kuala_Lumpur and America/Los_Angeles.
+- `npm run test:browser` passes with Playwright and Chromium supplied by the test environment. Uses only a local static server and mocked API with synthetic records, with external requests blocked. Covers legacy record load/save, preserved mileage/note/cycle, invalid input rejection, unset cycle, live preview, 360/390/768/1280px layouts without horizontal overflow or truncated field labels.
+- Real downloads verified for TEST888 and TEST999: dynamic `BrakeFluid_<plate>_front.jpg`, MIME image/jpeg, FF D8 FF signature, decoded as JPEG 1720×1085. JPEG visually inspected with due date and original Logo. Existing JPEG encoding/naming implementation unchanged.
+- Existing PWA tests referenced obsolete icon names/maskable metadata; assertions updated to the already-confirmed v2 icons, without changing any actual icon or manifest.
+- To rerun browser checks, install Playwright in your test environment and run `npm run test:browser` from server. Optional `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` chooses an installed Chromium. External web fonts were blocked during this run; physical Samsung/font loading is not claimed as tested.
+- No production API/DB access, deployment, merge, or edits to real customer records. Review/merge/deployment remains pending approval.
 
 ## JPEG download update — 2026-10-13
 - Implemented in the correct repository `Jaylene01/BRAKE-FLUID-SERVICE-REMINDER`, main branch; Railway project/service `brake-fluid-reminder`.
