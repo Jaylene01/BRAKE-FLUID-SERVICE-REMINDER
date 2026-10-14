@@ -12,8 +12,8 @@ assert.match(html, /navigator\.serviceWorker\.register\("\/sw\.js"\)/);
 assert.equal(manifest.display, 'standalone');
 assert.equal(manifest.start_url, '/');
 assert.ok(Array.isArray(manifest.icons) && manifest.icons.length > 0);
-assert.ok(manifest.icons.some(icon => icon.src === '/icons/icon-192.png' && icon.type === 'image/png'));
-assert.ok(manifest.icons.some(icon => icon.src === '/icons/icon-512.png' && icon.type === 'image/png' && icon.purpose.includes('maskable')));
+assert.ok(manifest.icons.some(icon => icon.src === '/icons/brake-fluid-no-text-192-v2.png' && icon.type === 'image/png'));
+assert.ok(manifest.icons.some(icon => icon.src === '/icons/brake-fluid-no-text-512-v2.png' && icon.type === 'image/png' && icon.purpose === 'any'));
 
 assert.match(sw, /url\.pathname\.startsWith\('\/api\/'\)/);
 assert.match(sw, /event\.respondWith\(fetch\(request\)\)/);

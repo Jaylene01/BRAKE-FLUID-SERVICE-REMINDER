@@ -1,0 +1,20 @@
+const {chromium}=require('playwright');const http=require('http');const fs=require('fs');const assert=require('assert/strict');
+(async()=>{
+const root=require('path').join(__dirname,'public');
+const output=fs.mkdtempSync(require('path').join(require('os').tmpdir(),'fluid-test-'));
+const server=http.createServer((req,res)=>{if(req.url.startsWith('/api/')){res.setHeader('Content-Type','application/json');return res.end('{"records":[]}');}res.setHeader('Content-Type',req.url==='/'?'text/html':'application/octet-stream');let path=root+(req.url==='/'?'/index.html':req.url);try{res.end(fs.readFileSync(path));}catch{res.writeHead(404);res.end();}});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH||undefined,args:['--no-sandbox','--disable-dev-shm-usage','--no-zygote','--single-process','--disable-gpu']});const ctx=await browser.newContext({acceptDownloads:true,serviceWorkers:'block',viewport:{width:390,height:844}});const page=await ctx.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+let records=[{id:'legacy',customer:'TEST CUSTOMER',plate:'TEST888',model:'TEST MODEL',mileage:89872,serviceDate:'2026-10-14',months:18,intervalKm:40000,fluid:'DOT 4',lang:'zh',wa:'',invoice:'TEST',note:'unchanged'}];let writes=[];
+await page.route('**/api/records**',async route=>{const req=route.request();if(req.method()==='GET')return route.fulfill({json:{records}});const body=req.postDataJSON();writes.push(body);records=[{...body,id:'legacy'}];return route.fulfill({json:{record:records[0]}});});
+await page.route('https://**/*',route=>route.abort());await page.goto('http://127.0.0.1:'+server.address().port);
+assert.equal(await page.locator('#iMonths').inputValue(),'');assert.equal(await page.locator('#oNextDue').textContent(),'—');
+await page.locator('#tabHist').click();await page.getByRole('button',{name:'载入修改'}).click();assert.equal(await page.locator('#iMonths').inputValue(),'18');assert.equal(await page.locator('#oNextDue').textContent(),'14/04/2028');assert.equal(await page.locator('#oNextKm').textContent(),'129,872 KM');
+await page.locator('#btnSave').click();await page.waitForTimeout(100);assert.equal(writes[0].months,18);assert.equal(writes[0].note,'unchanged');assert.equal(writes[0].mileage,89872);
+await page.locator('#iService').fill('2024-01-31');await page.locator('#iMonths').fill('1');assert.equal(await page.locator('#oNextDue').textContent(),'29/02/2024');
+await page.locator('#iMonths').fill('1.5');await page.locator('#btnSave').click();assert.equal(writes.length,1);
+await page.locator('#iMonths').fill('12');await page.locator('#iService').fill('2026-10-14');
+for(const plate of ['TEST888','TEST999']){await page.locator('#iPlate').fill(plate);const downloaded=page.waitForEvent('download');await page.locator('#btnPngF').click();const d=await downloaded;assert.equal(d.suggestedFilename(),`BrakeFluid_${plate}_front.jpg`);const file=require('path').join(output,d.suggestedFilename());await d.saveAs(file);assert.equal(fs.readFileSync(file).subarray(0,3).toString('hex'),'ffd8ff');console.log('JPEG verified',d.suggestedFilename(),fs.statSync(file).size);}
+await page.locator('#iMonths').fill('');assert.equal(await page.locator('#oNextDue').textContent(),'—');await page.locator('#iMonths').fill('12');
+for(const width of [360,390,768,1280]){await page.setViewportSize({width,height:900});await page.waitForTimeout(100);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.equal(await page.locator('.face.front .f').count(),7);assert(await page.evaluate(()=>[...document.querySelectorAll('.face.front .lab')].every(e=>e.scrollWidth<=e.clientWidth+1)));await page.screenshot({path:require('path').join(output,`fluid-${width}.png`),fullPage:true});}
+assert.deepEqual(errors,[]);console.log('Mocked save/reload, legacy cycle, invalid input, mobile layouts and two JPEG downloads passed. No production calls.');await browser.close();server.close();fs.rmSync(output,{recursive:true,force:true});
+})().catch(e=>{console.error(e);process.exit(1)});

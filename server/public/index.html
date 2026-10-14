@@ -123,7 +123,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Manrope","Noto 
 .cardtitle{font-family:"Chakra Petch",sans-serif;font-size:3.1cqw;font-weight:700;letter-spacing:.17em;margin-top:4.3cqw;color:#E9C077}
 .cardtitle b{font-weight:700;color:#E9C077}
 
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.6cqw 2.7cqw;margin-top:auto;padding-top:3.4cqw}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:2.6cqw 2.7cqw;margin-top:auto;padding-top:3.4cqw}
+.grid .f{grid-column:span 4}
+.grid .f:nth-child(n+4){grid-column:span 3}
+.grid .f:nth-child(n+4) .lab{font-size:1.5cqw;letter-spacing:.08em}
 .f .lab{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:1.82cqw;letter-spacing:.15em;text-transform:uppercase;
   color:rgba(233,192,119,.80);margin-bottom:1.2cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .f .val{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:3.15cqw;letter-spacing:.03em;font-variant-numeric:tabular-nums;
@@ -303,6 +306,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
                 <div class="f"><div class="lab">Model</div><div class="val" id="oModel">—</div></div>
                 <div class="f"><div class="lab">Last Service Date</div><div class="val" id="oService">28/09/2026</div></div>
                 <div class="f"><div class="lab">Last Service KM</div><div class="val" id="oMileage">12,500 KM</div></div>
+                <div class="f accent"><div class="lab">Next Service Due</div><div class="val" id="oNextDue">—</div></div>
                 <div class="f accent"><div class="lab">Next Service KM</div><div class="val" id="oNextKm">52,500 KM</div></div>
               </div>
             </div>
@@ -355,9 +359,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 
       <div class="sect">
         <h2 class="stitle">保养设置</h2>
-        <p class="sdesc">下次保养里程会自动算出来。</p>
+        <p class="sdesc">日期按你填写的月份计算，里程按 KM 周期计算。未设置月份时不推算日期；旧记录已有月份请先核对。</p>
         <div class="fields">
           <label class="fld">本次保养日期<input id="iService" type="date"></label>
+          <label class="fld">日期周期（月）<input id="iMonths" type="number" min="0" max="1200" step="1" placeholder="未设置" aria-describedby="monthsHelp"></label>
           <label class="fld">刹车油型号<input id="iFluid" type="text" list="fluidList" maxlength="40" placeholder="可自己填写，例如 DOT 4" autocomplete="off"></label>
           <datalist id="fluidList">
             <option value="DOT 3"></option><option value="DOT 4"></option><option value="DOT 4 LV"></option>
@@ -377,7 +382,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
           </label>
           <label class="fld">WhatsApp 号码<input id="iWa" type="text" value="016-230 0968" autocomplete="off"></label>
         </div>
+        <p class="note" id="monthsHelp">填写实际更换周期；留空或 0 表示未设置日期提醒。月底按目标月份最后一天计算。</p>
         <div class="summary">
+          <div class="d"><span class="k">下次保养日期 Next Service Due</span><span class="v gold" id="dNextDue">—</span></div>
           <div class="d"><span class="k">下次保养里程 Next KM</span><span class="v gold" id="dNextKm">—</span></div>
           <div class="d"><span class="k">更换周期 Change Every</span><span class="v" id="dEvery">—</span></div>
           <div class="d"><span class="k">刹车油 Fluid</span><span class="v" id="dFluid">—</span></div>
@@ -462,9 +469,18 @@ applyTheme();
 function num(n){return n.toLocaleString("en-US");}
 function km(n){return num(n)+" KM";}
 function pad(n){return n<10?"0"+n:""+n;}
-function fmt(d){return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear();}
+function fmt(d){if(!d||!Number.isFinite(d.getTime()))return "—";return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear();}
 function todayISO(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
 function parseISO(s){return s?new Date(s+"T00:00:00"):new Date();}
+function validMonths(v){return Number.isInteger(v)&&v>=0&&v<=1200;}
+function addMonthsClamped(s,months){
+  if(!months||!validMonths(months)||!/^\d{4}-\d{2}-\d{2}$/.test(s||""))return null;
+  var svc=parseISO(s);
+  if(!Number.isFinite(svc.getTime())||svc.getFullYear()!==+s.slice(0,4)||svc.getMonth()+1!==+s.slice(5,7)||svc.getDate()!==+s.slice(8,10))return null;
+  var due=new Date(svc.getFullYear(),svc.getMonth()+months,1);
+  var last=new Date(due.getFullYear(),due.getMonth()+1,0).getDate();
+  due.setDate(Math.min(svc.getDate(),last));return due;
+}
 function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");
   clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove("on");},2800);}
 function waLink(raw){var d=(raw||"").replace(/\D/g,"");if(!d)return "#";
@@ -472,12 +488,12 @@ function waLink(raw){var d=(raw||"").replace(/\D/g,"");if(!d)return "#";
 
 var DEF={intervalKm:40000,fluid:"DOT 4",wa:"016-230 0968",lang:"zh"};
 var TERMS={zh:["刹车油具有吸湿性，使用时间越长含水量越高，沸点下降会导致刹车性能衰退。",
-  "请以卡面 Next Service KM 为准，行驶到该里程前请回厂更换刹车油。",
+  "请以卡面 Next Service KM 及已设置的 Next Service Due 日期为准，任一先到请回厂更换刹车油。",
   "如出现刹车踏板变软、行程变长或刹车油警示灯亮起，请立即停止驾驶并联系 WEIDE 检查。",
   "经常激烈驾驶、跑山或赛道日使用，建议缩短更换周期，并在每次赛道日前检查刹车油。",
   "预约保养或有任何疑问，欢迎随时通过右侧 WhatsApp 与我们联系，我们乐意为您服务。"],
 en:["Brake fluid absorbs moisture over time. Higher water content lowers its boiling point and reduces braking performance.",
-  "Please refer to the Next Service KM on the front of this card and return for a brake fluid change before reaching it.",
+  "Return for a brake fluid change by Next Service KM or the configured Next Service Due date, whichever comes first.",
   "If the brake pedal feels soft, pedal travel increases or the brake warning light comes on, stop driving and contact WEIDE immediately.",
   "For spirited driving, mountain roads or track days, shorten the change interval and check the fluid before every track day.",
   "For service bookings or any enquiries, feel free to reach us anytime via WhatsApp on the right. We are always happy to help."]};
@@ -486,7 +502,7 @@ var FOOT={zh:"WEIDE LUXURY CAR PARTS & ACCESSORIES · 专注刹车，只做刹�
 function readForm(){
   var m=parseInt($("iMileage").value,10); if(isNaN(m)||m<0)m=0;
   return {customer:$("iCustomer").value.trim(),plate:$("iPlate").value.trim(),model:$("iModel").value.trim(),
-    mileage:m,serviceDate:$("iService").value||todayISO(),
+    months:$("iMonths").value===""?0:Number($("iMonths").value),mileage:m,serviceDate:$("iService").value||todayISO(),
     intervalKm:parseInt($("iIntervalKm").value,10)||DEF.intervalKm,fluid:$("iFluid").value.trim(),lang:$("iLang").value==="en"?"en":"zh",
     wa:$("iWa").value.trim(),invoice:$("iInvoice").value.trim(),note:$("iNote").value.trim()};
 }
@@ -500,12 +516,13 @@ function writeForm(r){
   $("iCustomer").value=r.customer||""; $("iPlate").value=r.plate||"";
   $("iModel").value=r.model||""; $("iMileage").value=(r.mileage===0||r.mileage)?r.mileage:"";
   $("iService").value=r.serviceDate||todayISO();
+  $("iMonths").value=r.months==null||r.months===0?"":r.months;
   setSelect($("iIntervalKm"),r.intervalKm,DEF.intervalKm);
   $("iFluid").value=r.fluid==null?DEF.fluid:r.fluid; $("iLang").value=r.lang==="en"?"en":"zh";
   $("iWa").value=r.wa||DEF.wa; $("iInvoice").value=r.invoice||""; $("iNote").value=r.note||"";
 }
 function derive(r){
-  return {svc:parseISO(r.serviceDate),nextKm:r.mileage+(r.intervalKm||DEF.intervalKm)};
+  return {svc:parseISO(r.serviceDate),nextDue:addMonthsClamped(r.serviceDate,r.months),nextKm:r.mileage+(r.intervalKm||DEF.intervalKm)};
 }
 
 function render(){
@@ -516,6 +533,7 @@ function render(){
   $("oMileage").textContent=km(r.mileage);
   $("oService").textContent=fmt(d.svc);
   $("oNextKm").textContent=km(d.nextKm);
+  $("oNextDue").textContent=fmt(d.nextDue);$("dNextDue").textContent=fmt(d.nextDue);
   $("oFluid").textContent=r.fluid||"—";
   $("oEveryKm").textContent=km(r.intervalKm);
   $("oWa").textContent=r.wa||"—";
@@ -577,6 +595,7 @@ function setEditing(id){
 }
 async function saveRecord(){
   var r=readForm();
+  if(!validMonths(r.months)){toast("日期周期请输入 0 至 1200 的整数月份");return;}
   if(!r.plate&&!r.customer){toast("请先填客户名或车牌");return;}
   var btn=$("btnSave");var oldTxt=btn.textContent;btn.disabled=true;btn.textContent="保存中…";
   try{
@@ -620,6 +639,7 @@ function renderHist(){
     l1.appendChild(sp);l1.appendChild(sc);
     var l2=document.createElement("div");l2.className="l2";
     var bits=[fmt(d.svc),km(r.mileage)+" → "+km(d.nextKm)];
+    if(d.nextDue)bits.push("Next Service Due "+fmt(d.nextDue));
     if(r.fluid)bits.push(r.fluid);
     if(r.model)bits.push(r.model);
     if(r.invoice)bits.push("Invoice No. "+r.invoice);
@@ -729,11 +749,13 @@ function drawFront(ctx,r,d){
   var gy=H-PT-(rowH*2+rowGap);
   var items=[["CUSTOMER",(r.customer||"—").toUpperCase(),0],["VEHICLE NO.",(r.plate||"—").toUpperCase(),0],
     ["MODEL",(r.model||"—").toUpperCase(),0],["LAST SERVICE DATE",fmt(d.svc),0],["LAST SERVICE KM",km(r.mileage),0],
-    ["NEXT SERVICE KM",km(d.nextKm),1]];
+    ["NEXT SERVICE DUE",fmt(d.nextDue),1],["NEXT SERVICE KM",km(d.nextKm),1]];
   items.forEach(function(it,i){
-    var cw=(W-2*P-2*gap)/3,cx=P+(i%3)*(cw+gap),cy=gy+Math.floor(i/3)*(rowH+rowGap);
-    font(ctx,1.82*U,600);ctx.fillStyle="rgba(233,192,119,.80)";
-    tt(ctx,it[0],cx,cy+labH*0.8,1.82*U*0.15);
+    var cols=i<3?3:4,col=i<3?i:i-3;
+    var cw=(W-2*P-(cols-1)*gap)/cols,cx=P+col*(cw+gap),cy=gy+(i<3?0:rowH+rowGap);
+    var ls=(i<3?1.82:1.5)*U;
+    font(ctx,ls,600);ctx.fillStyle="rgba(233,192,119,.80)";
+    tt(ctx,it[0],cx,cy+labH*0.8,ls*(i<3?0.15:0.08));
     var vy=cy+labH+1.2*U;
     pillBox(ctx,cx,vy,cw,vh,it[2]?"rgba(255,77,79,.05)":"rgba(255,255,255,.05)",it[2]?"rgba(255,77,79,.38)":"rgba(255,255,255,.17)");
     var vs=3.15*U;font(ctx,vs,600);ctx.fillStyle=it[2]?"#FF4D4F":"#F0F1F2";
@@ -852,9 +874,9 @@ async function exportJSON(){
   var r=await offer("WEIDE-brake-fluid-backup.json",blob);
   toast(r==="saved"?"备份已下载":(r==="declined"?"已取消":"浏览器不允许下载"));}
 async function exportCSV(){
-  var head=["车牌","客户","车型","刹车油","保养里程KM","保养日期","周期KM","下次保养里程KM","Invoice No.","备注"];
+  var head=["车牌","客户","车型","刹车油","保养里程KM","保养日期","周期KM","下次保养里程KM","日期周期月","下次保养日期","Invoice No.","备注"];
   var rows=records.map(function(r){var d=derive(r);
-    return [r.plate,r.customer,r.model,r.fluid,r.mileage,r.serviceDate,r.intervalKm,d.nextKm,r.invoice,(r.note||"").replace(/\n/g," ")];});
+    return [r.plate,r.customer,r.model,r.fluid,r.mileage,r.serviceDate,r.intervalKm,d.nextKm,r.months||0,d.nextDue?d.nextDue.getFullYear()+"-"+pad(d.nextDue.getMonth()+1)+"-"+pad(d.nextDue.getDate()):"",r.invoice,(r.note||"").replace(/\n/g," ")];});
   var csv="﻿"+[head].concat(rows).map(function(a){
     return a.map(function(v){v=(v==null?"":String(v));return '"'+v.replace(/"/g,'""')+'"';}).join(",");}).join("\n");
   var r2=await offer("WEIDE-brake-fluid-records.csv",new Blob([csv],{type:"text/csv"}));
@@ -930,7 +952,7 @@ if(fine){
     tilt.style.transform="rotateX(0deg) rotateY(0deg)";});
 }
 
-["iCustomer","iPlate","iModel","iMileage","iService","iFluid","iIntervalKm","iLang","iWa","iInvoice","iNote"].forEach(function(id){
+["iCustomer","iPlate","iModel","iMileage","iService","iMonths","iFluid","iIntervalKm","iLang","iWa","iInvoice","iNote"].forEach(function(id){
   $(id).addEventListener("input",render);$(id).addEventListener("change",render);});
 
 function fitVals(){ /* 车型等太长的值自动缩小字体 */
